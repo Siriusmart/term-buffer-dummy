@@ -8,6 +8,9 @@ import org.junit.Test;
  * TerminalBufferTest
  */
 public class TerminalBufferTest {
+    /**
+     * The empty terminal outputs a string of 5x5 spaces
+     */
     @Test
     public void emptyTerminal() {
         TerminalBuffer term = new TerminalBuffer(5, 5, 100);
@@ -22,6 +25,11 @@ public class TerminalBufferTest {
         assertEquals(new Vec2I(0, 0), term.getCursorPos());
     }
 
+    /**
+     * Write "hello world", it should wrap around to the new line
+     *
+     * Also tests cursor position is correct
+     */
     @Test
     public void helloWorldWrite() {
         TerminalBuffer term = new TerminalBuffer(5, 5, 100);
@@ -37,6 +45,12 @@ public class TerminalBufferTest {
         assertEquals(new Vec2I(1, 2), term.getCursorPos());
     }
 
+    /**
+     * Inserts "hello world", it should wrap around to the new line,
+     * because the buffer is empty, behaviour should be the same as write
+     *
+     * Also tests cursor position is correct
+     */
     @Test
     public void helloWorldInsert() {
         TerminalBuffer term = new TerminalBuffer(5, 5, 100);
@@ -52,6 +66,10 @@ public class TerminalBufferTest {
         assertEquals(new Vec2I(1, 2), term.getCursorPos());
     }
 
+    /**
+     * Moves cursor back to 0,0 and writes string to existing buffer,
+     * this should overwrite the original string if overlap
+     */
     @Test
     public void byeWorldWrite() {
         TerminalBuffer term = new TerminalBuffer(5, 5, 100);
@@ -80,6 +98,10 @@ public class TerminalBufferTest {
         assertEquals(new Vec2I(4, 1), term.getCursorPos());
     }
 
+    /**
+     * Moves cursor back to 0,0 and writes string to existing buffer,
+     * this should push the original string back, wrapping around if reaches endline
+     */
     @Test
     public void byeWorldInsert() {
         TerminalBuffer term = new TerminalBuffer(5, 5, 100);
@@ -108,6 +130,11 @@ public class TerminalBufferTest {
         assertEquals(new Vec2I(4, 1), term.getCursorPos());
     }
 
+    /**
+     * New lines should not move the cursor,
+     * but adding multiple new lines adds them one
+     * under the other
+     */
     @Test
     public void newLine() {
         TerminalBuffer term = new TerminalBuffer(5, 5, 100);
@@ -160,6 +187,9 @@ public class TerminalBufferTest {
         assertEquals(new Vec2I(0, 0), term.getCursorPos());
     }
 
+    /**
+     * write text with new lines
+     */
     @Test
     public void lineBreakTest() {
         TerminalBuffer term = new TerminalBuffer(5, 5, 100);
@@ -190,5 +220,44 @@ public class TerminalBufferTest {
                 + "g    ";
         assertEquals(expected3, term.getScreenString());
         assertEquals(new Vec2I(1, 4), term.getCursorPos());
+    }
+
+    /**
+     * clearing screen leaves scrollback unmodified
+     */
+    @Test
+    public void clearScreen() {
+        TerminalBuffer term = new TerminalBuffer(5, 5, 100);
+
+        term.newLine('A');
+        term.newLine('B');
+        term.newLine('C');
+        term.newLine('D');
+        term.newLine('E');
+        term.newLine('F');
+        String expected1 = "AAAAA" + '\n'
+                + "BBBBB" + '\n'
+                + "CCCCC" + '\n'
+                + "DDDDD" + '\n'
+                + "EEEEE" + '\n'
+                + "FFFFF";
+        assertEquals(expected1, term.getAllString());
+
+        term.clearScreen();
+        String expected2 = "AAAAA" + '\n'
+                + "     " + '\n'
+                + "     " + '\n'
+                + "     " + '\n'
+                + "     " + '\n'
+                + "     ";
+        assertEquals(expected2, term.getAllString());
+
+        term.clearAll();
+        String expected3 = "     " + '\n'
+                + "     " + '\n'
+                + "     " + '\n'
+                + "     " + '\n'
+                + "     ";
+        assertEquals(expected3, term.getAllString());
     }
 }

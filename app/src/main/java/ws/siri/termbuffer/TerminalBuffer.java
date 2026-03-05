@@ -210,7 +210,7 @@ public class TerminalBuffer implements ITerminalBuffer {
             Optional<Cell> cell = screen.get(xy.y * screenDimensions.x + xy.x);
             return cell.isPresent() ? cell.get().content : ' ';
         } else {
-            if ((-xy.y) < scrollback.size())
+            if ((-xy.y) > scrollback.size())
                 throw new RuntimeException(String.format("y=%d on scrollback with %d lines", xy.y, scrollback.size()));
 
             return scrollback.get(scrollback.size() + xy.y).get(xy.x).content;
