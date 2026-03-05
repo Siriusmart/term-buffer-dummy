@@ -1,7 +1,6 @@
 package ws.siri.termbuffer;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -282,7 +281,7 @@ public class TerminalBuffer implements ITerminalBuffer {
 
         // remove line from screen
         screen.subList(0, screenDimensions.x).clear();
-        cursorPos.y--; // correct cursor position
+        moveCursorUp(1); // correct cursor position
 
         lineIsEmpty.removeFirst(); // maintain lineIsEmpty
     }

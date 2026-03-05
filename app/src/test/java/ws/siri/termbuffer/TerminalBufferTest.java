@@ -19,6 +19,7 @@ public class TerminalBufferTest {
                 + "     ";
 
         assertEquals(expected, term.getScreenString());
+        assertEquals(new Vec2I(0, 0), term.getCursorPos());
     }
 
     @Test
@@ -33,6 +34,7 @@ public class TerminalBufferTest {
                 + "     ";
 
         assertEquals(expected, term.getScreenString());
+        assertEquals(new Vec2I(1, 2), term.getCursorPos());
     }
 
     @Test
@@ -47,6 +49,7 @@ public class TerminalBufferTest {
                 + "     ";
 
         assertEquals(expected, term.getScreenString());
+        assertEquals(new Vec2I(1, 2), term.getCursorPos());
     }
 
     @Test
@@ -61,6 +64,7 @@ public class TerminalBufferTest {
                 + "     ";
 
         assertEquals(expected1, term.getScreenString());
+        assertEquals(new Vec2I(1, 2), term.getCursorPos());
 
         term.setCursorX(0);
         term.setCursorY(0);
@@ -73,6 +77,7 @@ public class TerminalBufferTest {
                 + "     ";
 
         assertEquals(expected2, term.getScreenString());
+        assertEquals(new Vec2I(4, 1), term.getCursorPos());
     }
 
     @Test
@@ -87,6 +92,7 @@ public class TerminalBufferTest {
                 + "     ";
 
         assertEquals(expected1, term.getScreenString());
+        assertEquals(new Vec2I(1, 2), term.getCursorPos());
 
         term.setCursorX(0);
         term.setCursorY(0);
@@ -99,6 +105,7 @@ public class TerminalBufferTest {
                 + "     ";
 
         assertEquals(expected2, term.getScreenString());
+        assertEquals(new Vec2I(4, 1), term.getCursorPos());
     }
 
     @Test
@@ -112,6 +119,7 @@ public class TerminalBufferTest {
                 + "     " + '\n'
                 + "     ";
         assertEquals(expected1, term.getScreenString());
+        assertEquals(new Vec2I(0, 0), term.getCursorPos());
 
         term.newLine('B');
         String expected2 = "AAAAA" + '\n'
@@ -120,6 +128,7 @@ public class TerminalBufferTest {
                 + "     " + '\n'
                 + "     ";
         assertEquals(expected2, term.getScreenString());
+        assertEquals(new Vec2I(0, 0), term.getCursorPos());
 
         term.newLine('C');
         term.newLine('D');
@@ -130,6 +139,7 @@ public class TerminalBufferTest {
                 + "DDDDD" + '\n'
                 + "EEEEE";
         assertEquals(expected3, term.getScreenString());
+        assertEquals(new Vec2I(0, 0), term.getCursorPos());
 
         term.newLine('F');
         String expected4 = "BBBBB" + '\n'
@@ -138,6 +148,7 @@ public class TerminalBufferTest {
                 + "EEEEE" + '\n'
                 + "FFFFF";
         assertEquals(expected4, term.getScreenString());
+        assertEquals(new Vec2I(0, 0), term.getCursorPos());
 
         String expected5 = "AAAAA" + '\n'
                 + "BBBBB" + '\n'
@@ -146,6 +157,7 @@ public class TerminalBufferTest {
                 + "EEEEE" + '\n'
                 + "FFFFF";
         assertEquals(expected5, term.getAllString());
+        assertEquals(new Vec2I(0, 0), term.getCursorPos());
     }
 
     @Test
@@ -159,6 +171,7 @@ public class TerminalBufferTest {
                 + "     " + '\n'
                 + "c    ";
         assertEquals(expected1, term.getScreenString());
+        assertEquals(new Vec2I(1, 4), term.getCursorPos());
 
         term.writeText("de");
         String expected2 = "a    " + '\n'
@@ -167,13 +180,15 @@ public class TerminalBufferTest {
                 + "     " + '\n'
                 + "cde  ";
         assertEquals(expected2, term.getScreenString());
+        assertEquals(new Vec2I(3, 4), term.getCursorPos());
 
-        term.writeText("\n");
+        term.writeText("\nf\n\ng");
         String expected3 = "     " + '\n'
-                + "b    " + '\n'
-                + "     " + '\n'
                 + "cde  " + '\n'
-                + "     ";
+                + "f    " + '\n'
+                + "     " + '\n'
+                + "g    ";
         assertEquals(expected3, term.getScreenString());
+        assertEquals(new Vec2I(1, 4), term.getCursorPos());
     }
 }
