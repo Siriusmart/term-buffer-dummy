@@ -1,6 +1,7 @@
 package ws.siri.termbuffer;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -31,6 +32,9 @@ public class TerminalBuffer implements ITerminalBuffer {
     // screen is maintained so that its length is exactly width * height
     private ArrayList<Optional<Cell>> screen;
 
+    // keep track of which lines are empty
+    private LinkedList<Boolean> lineIsEmpty;
+
     /**
      * Create new terminal buffer with initial settings
      */
@@ -45,6 +49,10 @@ public class TerminalBuffer implements ITerminalBuffer {
         // initialise screen with empty cells
         for (int i = 0; i < screenWidth * screenHeight; i++)
             screen.add(Optional.empty());
+
+        this.lineIsEmpty = new LinkedList<>();
+        for (int i = 0; i < screenHeight; i++)
+            lineIsEmpty.add(true);
     }
 
     @Override
@@ -119,6 +127,8 @@ public class TerminalBuffer implements ITerminalBuffer {
 
     @Override
     public void replaceChar(Optional<Character> c) {
+        lineIsEmpty.set(cursorPos.y, false); // line is written to and no longer
+        // empty
         Optional<Cell> cell = c.isPresent() ? Optional.of(new Cell(cursorStyle, c.get())) : Optional.empty();
         screen.set(getCursorIndex(), cell);
         wrappingMoveRight();
@@ -126,6 +136,7 @@ public class TerminalBuffer implements ITerminalBuffer {
 
     @Override
     public void insertChar(Optional<Character> c) {
+        lineIsEmpty.set(cursorPos.y, false); // line is written to and no longer empty
         Optional<Cell> cell = c.isPresent() ? Optional.of(new Cell(cursorStyle, c.get())) : Optional.empty();
 
         int cur = getCursorIndex();
@@ -146,10 +157,13 @@ public class TerminalBuffer implements ITerminalBuffer {
             for (int j = 1; j < screenDimensions.x; j++)
                 screen.add(Optional.empty());
 
+            // new line is used
+            lineIsEmpty.addLast(false);
+
             flushScreen(); // remove the extra line we just added
             wrappingMoveRight();
         } else { // new line does not have to be created
-            for (int j = i; j < cur; j++)
+            for (int j = i; j > cur; j--)
                 screen.set(j, screen.get(j - 1));
 
             screen.set(cur, cell);
@@ -159,11 +173,28 @@ public class TerminalBuffer implements ITerminalBuffer {
 
     @Override
     public void newLine(Optional<Character> c) {
-        for (int i = 0; i < screenDimensions.x; i++)
-            if (c.isPresent())
-                screen.add(Optional.of(new Cell(cursorStyle, c.get())));
-            else
-                screen.add(Optional.empty());
+        int y = 0;
+        // find the first line that is not used
+        while (y < screenDimensions.y && !lineIsEmpty.get(y))
+            y++;
+
+        if (y == screenDimensions.y) {// add a new line
+            lineIsEmpty.add(false);
+            for (int i = 0; i < screenDimensions.x; i++)
+                if (c.isPresent())
+                    screen.add(y * screenDimensions.x, Optional.of(new Cell(cursorStyle,
+                            c.get())));
+                else
+                    screen.add(y * screenDimensions.x, Optional.empty());
+        } else { // theres is an empty line not in the end
+            lineIsEmpty.set(y, false);
+            for (int i = 0; i < screenDimensions.x; i++)
+                if (c.isPresent())
+                    screen.set(y * screenDimensions.x + i, Optional.of(new Cell(cursorStyle,
+                            c.get())));
+                else
+                    screen.set(y * screenDimensions.x + i, Optional.empty());
+        }
 
         flushScreen();
     }
@@ -180,10 +211,10 @@ public class TerminalBuffer implements ITerminalBuffer {
             Optional<Cell> cell = screen.get(xy.y * screenDimensions.x + xy.x);
             return cell.isPresent() ? cell.get().content : ' ';
         } else {
-            if ((-xy.y) <= scrollback.size())
+            if ((-xy.y) < scrollback.size())
                 throw new RuntimeException(String.format("y=%d on scrollback with %d lines", xy.y, scrollback.size()));
 
-            return scrollback.get(scrollback.size() + xy.y).get(xy.y).content;
+            return scrollback.get(scrollback.size() + xy.y).get(xy.x).content;
         }
     }
 
@@ -199,10 +230,10 @@ public class TerminalBuffer implements ITerminalBuffer {
             Optional<Cell> cell = screen.get(xy.y * screenDimensions.x + xy.x);
             return cell.isPresent() ? cell.get().style : CellStyle.empty();
         } else {
-            if ((-xy.y) <= scrollback.size())
+            if ((-xy.y) < scrollback.size())
                 throw new RuntimeException(String.format("y=%d on scrollback with %d lines", xy.y, scrollback.size()));
 
-            return scrollback.get(scrollback.size() + xy.y).get(xy.y).style;
+            return scrollback.get(scrollback.size() + xy.y).get(xy.x).style;
         }
     }
 
@@ -252,6 +283,8 @@ public class TerminalBuffer implements ITerminalBuffer {
         // remove line from screen
         screen.subList(0, screenDimensions.x).clear();
         cursorPos.y--; // correct cursor position
+
+        lineIsEmpty.removeFirst(); // maintain lineIsEmpty
     }
 
     @Override
@@ -264,5 +297,10 @@ public class TerminalBuffer implements ITerminalBuffer {
     public void clearAll() {
         clearScreen();
         scrollback.clear();
+    }
+
+    @Override
+    public void markLineEmpty(int y, boolean b) {
+        lineIsEmpty.set(y, b);
     }
 }

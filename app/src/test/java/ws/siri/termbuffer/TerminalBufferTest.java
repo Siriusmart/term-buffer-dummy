@@ -18,7 +18,7 @@ public class TerminalBufferTest {
                 + "     " + '\n'
                 + "     ";
 
-        assertEquals(term.getScreenString(), expected);
+        assertEquals(expected, term.getScreenString());
     }
 
     @Test
@@ -32,7 +32,7 @@ public class TerminalBufferTest {
                 + "     " + '\n'
                 + "     ";
 
-        assertEquals(term.getScreenString(), expected);
+        assertEquals(expected, term.getScreenString());
     }
 
     @Test
@@ -46,7 +46,7 @@ public class TerminalBufferTest {
                 + "     " + '\n'
                 + "     ";
 
-        assertEquals(term.getScreenString(), expected);
+        assertEquals(expected, term.getScreenString());
     }
 
     @Test
@@ -60,7 +60,7 @@ public class TerminalBufferTest {
                 + "     " + '\n'
                 + "     ";
 
-        assertEquals(term.getScreenString(), expected1);
+        assertEquals(expected1, term.getScreenString());
 
         term.setCursorX(0);
         term.setCursorY(0);
@@ -72,7 +72,7 @@ public class TerminalBufferTest {
                 + "     " + '\n'
                 + "     ";
 
-        assertEquals(term.getScreenString(), expected2);
+        assertEquals(expected2, term.getScreenString());
     }
 
     @Test
@@ -86,7 +86,7 @@ public class TerminalBufferTest {
                 + "     " + '\n'
                 + "     ";
 
-        assertEquals(term.getScreenString(), expected1);
+        assertEquals(expected1, term.getScreenString());
 
         term.setCursorX(0);
         term.setCursorY(0);
@@ -98,6 +98,82 @@ public class TerminalBufferTest {
                 + "world" + '\n'
                 + "     ";
 
-        assertEquals(term.getScreenString(), expected2);
+        assertEquals(expected2, term.getScreenString());
+    }
+
+    @Test
+    public void newLine() {
+        TerminalBuffer term = new TerminalBuffer(5, 5, 100);
+
+        term.newLine('A');
+        String expected1 = "AAAAA" + '\n'
+                + "     " + '\n'
+                + "     " + '\n'
+                + "     " + '\n'
+                + "     ";
+        assertEquals(expected1, term.getScreenString());
+
+        term.newLine('B');
+        String expected2 = "AAAAA" + '\n'
+                + "BBBBB" + '\n'
+                + "     " + '\n'
+                + "     " + '\n'
+                + "     ";
+        assertEquals(expected2, term.getScreenString());
+
+        term.newLine('C');
+        term.newLine('D');
+        term.newLine('E');
+        String expected3 = "AAAAA" + '\n'
+                + "BBBBB" + '\n'
+                + "CCCCC" + '\n'
+                + "DDDDD" + '\n'
+                + "EEEEE";
+        assertEquals(expected3, term.getScreenString());
+
+        term.newLine('F');
+        String expected4 = "BBBBB" + '\n'
+                + "CCCCC" + '\n'
+                + "DDDDD" + '\n'
+                + "EEEEE" + '\n'
+                + "FFFFF";
+        assertEquals(expected4, term.getScreenString());
+
+        String expected5 = "AAAAA" + '\n'
+                + "BBBBB" + '\n'
+                + "CCCCC" + '\n'
+                + "DDDDD" + '\n'
+                + "EEEEE" + '\n'
+                + "FFFFF";
+        assertEquals(expected5, term.getAllString());
+    }
+
+    @Test
+    public void lineBreakTest() {
+        TerminalBuffer term = new TerminalBuffer(5, 5, 100);
+
+        term.writeText("a\n\nb\n\nc");
+        String expected1 = "a    " + '\n'
+                + "     " + '\n'
+                + "b    " + '\n'
+                + "     " + '\n'
+                + "c    ";
+        assertEquals(expected1, term.getScreenString());
+
+        term.writeText("de");
+        String expected2 = "a    " + '\n'
+                + "     " + '\n'
+                + "b    " + '\n'
+                + "     " + '\n'
+                + "cde  ";
+        assertEquals(expected2, term.getScreenString());
+
+        term.writeText("\n");
+        String expected3 = "     " + '\n'
+                + "b    " + '\n'
+                + "     " + '\n'
+                + "cde  " + '\n'
+                + "     ";
+        assertEquals(expected3, term.getScreenString());
     }
 }

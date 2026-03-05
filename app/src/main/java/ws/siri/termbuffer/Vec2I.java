@@ -11,4 +11,9 @@ public class Vec2I {
         this.x = x;
         this.y = y;
     }
+
+    @Override
+    public String toString() {
+        return String.format("(%d, %d)", x, y);
+    }
 }

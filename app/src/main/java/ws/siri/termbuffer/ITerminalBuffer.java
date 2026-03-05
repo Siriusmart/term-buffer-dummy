@@ -183,6 +183,11 @@ public interface ITerminalBuffer {
     public void clearAll();
 
     /**
+     * mark a line as used
+     */
+    public void markLineEmpty(int y, boolean b);
+
+    /**
      * Write a text on a line, overriding the current content. Moves the cursor.
      */
     default void writeText(String s) {
@@ -191,6 +196,8 @@ public interface ITerminalBuffer {
                 replaceChar(Optional.of(c));
                 continue;
             }
+
+            markLineEmpty(getCursorPos().y, false); // new line counts as writing to a line
 
             // special code for handling line breaks
             if (getCursorPos().y == getScreenDimension().y - 1) // at last line
@@ -211,6 +218,8 @@ public interface ITerminalBuffer {
                 insertChar(Optional.of(c));
                 continue;
             }
+
+            markLineEmpty(getCursorPos().y, false); // new line counts as writing to a line
 
             // if newline, insert empty cells to current line to push everything else back
             int remainingCharacters = getScreenDimension().x - getCursorPos().x;
