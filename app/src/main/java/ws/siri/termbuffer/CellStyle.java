@@ -5,6 +5,13 @@ package ws.siri.termbuffer;
  */
 public record CellStyle(Color fg, Color bg, boolean bold, boolean italic, boolean underline) {
     /**
+     * create empty (default) cell style
+     */
+    public static CellStyle empty() {
+        return new CellStyle(Color.DEFAULT, Color.DEFAULT, false, false, false);
+    }
+
+    /**
      * create copy of cell style with specified fg colour
      */
     public CellStyle withFg(Color fg) {

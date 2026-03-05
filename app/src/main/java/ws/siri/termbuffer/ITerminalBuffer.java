@@ -2,8 +2,21 @@ package ws.siri.termbuffer;
 
 /**
  * ITerminalBuffer
+ *
+ * - Top left pixel on screen is (0,0)
+ * - Scrollback has negative Y index
  */
 public interface ITerminalBuffer {
+    /**
+     * get screen dimension
+     */
+    public Vec2I getScreenDimension();
+
+    /**
+     * get number of lines in scrollback
+     */
+    public int getScrollbackLength();
+
     /**
      * Set cursor foreground colour
      */
@@ -100,15 +113,46 @@ public interface ITerminalBuffer {
      *
      * lines in scrollback has negative y
      */
-    public String getLineString(int y);
+    default String getLineString(int y) {
+        StringBuilder bobTheBuilder = new StringBuilder();
+        Vec2I dimension = getScreenDimension();
+        for (Vec2I pos = new Vec2I(0, y); pos.x < dimension.x; pos.x++)
+            bobTheBuilder.append(charAt(pos));
+
+        return bobTheBuilder.toString();
+    }
 
     /**
      * get screen content as string
      */
-    public String getScreenString();
+    default String getScreenString() {
+        StringBuilder bobTheBuilder = new StringBuilder();
+        Vec2I dimension = getScreenDimension();
+
+        for (int y = 0; y < dimension.y - 1; y++) {
+            bobTheBuilder.append(getLineString(y));
+            bobTheBuilder.append('\n');
+        }
+
+        bobTheBuilder.append(getLineString(dimension.y - 1));
+
+        return bobTheBuilder.toString();
+    }
 
     /**
      * get screen + scrollback content as string
      */
-    public String getAllString();
+    default String getAllString() {
+        StringBuilder bobTheBuilder = new StringBuilder();
+        Vec2I dimension = getScreenDimension();
+
+        for (int y = -getScrollbackLength(); y < dimension.y - 1; y++) {
+            bobTheBuilder.append(getLineString(y));
+            bobTheBuilder.append('\n');
+        }
+
+        bobTheBuilder.append(getLineString(dimension.y - 1));
+
+        return bobTheBuilder.toString();
+    }
 }
