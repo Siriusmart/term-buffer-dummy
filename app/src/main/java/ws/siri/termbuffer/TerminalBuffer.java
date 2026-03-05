@@ -43,7 +43,7 @@ public class TerminalBuffer implements ITerminalBuffer {
         this.screen = new ArrayList<>(screenWidth * screenHeight);
 
         // initialise screen with empty cells
-        for (int i = 0; i < screen.size(); i++)
+        for (int i = 0; i < screenWidth * screenHeight; i++)
             screen.add(Optional.empty());
     }
 
@@ -149,7 +149,7 @@ public class TerminalBuffer implements ITerminalBuffer {
             flushScreen(); // remove the extra line we just added
             wrappingMoveRight();
         } else { // new line does not have to be created
-            for (int j = i; j > cur; j++)
+            for (int j = i; j < cur; j++)
                 screen.set(j, screen.get(j - 1));
 
             screen.set(cur, cell);
