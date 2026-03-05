@@ -1,5 +1,7 @@
 package ws.siri.termbuffer;
 
+import java.util.Optional;
+
 /**
  * ITerminalBuffer
  *
@@ -16,6 +18,11 @@ public interface ITerminalBuffer {
      * get number of lines in scrollback
      */
     public int getScrollbackLength();
+
+    /**
+     * get cursor position on screen
+     */
+    public Vec2I getCursorPos();
 
     /**
      * Set cursor foreground colour
@@ -77,22 +84,31 @@ public interface ITerminalBuffer {
     /**
      * replaces character at cursor position, moving the cursor
      */
-    public void replaceChar(char c);
+    public void replaceChar(Optional<Character> c);
 
     /**
      * insert character at cursor position, moving the cursor
      */
-    public void insertChar(char c);
+    public void insertChar(Optional<Character> c);
 
     /**
      * insert empty line at bottom of screen
      */
-    public void newEmptyLine();
+    default void newEmptyLine() {
+        newLine(Optional.empty());
+    }
 
     /**
      * insert line filled with specified character at bottom of screen
      */
-    public void newLine(char c);
+    public void newLine(Optional<Character> c);
+
+    /**
+     * insert line filled with specified character at bottom of screen
+     */
+    default void newLine(char c) {
+        newLine(Optional.of(c));
+    }
 
     /**
      * get char at position
@@ -154,5 +170,56 @@ public interface ITerminalBuffer {
         bobTheBuilder.append(getLineString(dimension.y - 1));
 
         return bobTheBuilder.toString();
+    }
+
+    /**
+     * clear sceen content
+     */
+    public void clearScreen();
+
+    /**
+     * clear screen and scrollback
+     */
+    public void clearAll();
+
+    /**
+     * Write a text on a line, overriding the current content. Moves the cursor.
+     */
+    default void writeText(String s) {
+        for (char c : s.toCharArray()) {
+            if (c != '\n') { // normal character (not linebreak)
+                replaceChar(Optional.of(c));
+                continue;
+            }
+
+            // special code for handling line breaks
+            if (getCursorPos().y == getScreenDimension().y - 1) // at last line
+                newEmptyLine();
+
+            // move cursor to start of next line
+            moveCursorDown(1);
+            setCursorX(0);
+        }
+    }
+
+    /*
+     * Insert a text on a line, possibly wrapping the line. Moves the cursor.
+     */
+    default void insertText(String s) {
+        for (char c : s.toCharArray()) {
+            if (c != '\n') { // normal character (not linebreak)
+                insertChar(Optional.of(c));
+                continue;
+            }
+
+            // if newline, insert empty cells to current line to push everything else back
+            int remainingCharacters = getScreenDimension().x - getCursorPos().x;
+            for (int i = 0; i < remainingCharacters; i++)
+                insertChar(Optional.empty());
+
+            // move cursor to start of next line
+            moveCursorDown(1);
+            setCursorX(0);
+        }
     }
 }

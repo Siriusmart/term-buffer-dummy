@@ -58,6 +58,11 @@ public class TerminalBuffer implements ITerminalBuffer {
     }
 
     @Override
+    public Vec2I getCursorPos() {
+        return cursorPos;
+    }
+
+    @Override
     public void setCursorFg(Color color) {
         cursorStyle = cursorStyle.withFg(color);
     }
@@ -113,13 +118,16 @@ public class TerminalBuffer implements ITerminalBuffer {
     }
 
     @Override
-    public void replaceChar(char c) {
-        screen.set(getCursorIndex(), Optional.of(new Cell(cursorStyle, c)));
+    public void replaceChar(Optional<Character> c) {
+        Optional<Cell> cell = c.isPresent() ? Optional.of(new Cell(cursorStyle, c.get())) : Optional.empty();
+        screen.set(getCursorIndex(), cell);
         wrappingMoveRight();
     }
 
     @Override
-    public void insertChar(char c) {
+    public void insertChar(Optional<Character> c) {
+        Optional<Cell> cell = c.isPresent() ? Optional.of(new Cell(cursorStyle, c.get())) : Optional.empty();
+
         int cur = getCursorIndex();
         int i = cur;
         // search for next empty position
@@ -130,6 +138,8 @@ public class TerminalBuffer implements ITerminalBuffer {
             Optional<Cell> lastCell = screen.get(screen.size() - 1);
             for (int j = i - 1; j > cur; j++) // note: the last cell is no longer on screen after this
                 screen.set(j, screen.get(j - 1));
+
+            screen.set(cur, cell);
 
             // add new line with the first cell being the cell that we havent yet added
             screen.add(lastCell);
@@ -142,23 +152,18 @@ public class TerminalBuffer implements ITerminalBuffer {
             for (int j = i; j > cur; j++)
                 screen.set(j, screen.get(j - 1));
 
-            screen.set(cur, Optional.of(new Cell(cursorStyle, c)));
+            screen.set(cur, cell);
             wrappingMoveRight();
         }
     }
 
     @Override
-    public void newEmptyLine() {
+    public void newLine(Optional<Character> c) {
         for (int i = 0; i < screenDimensions.x; i++)
-            screen.add(Optional.empty());
-
-        flushScreen();
-    }
-
-    @Override
-    public void newLine(char c) {
-        for (int i = 0; i < screenDimensions.x; i++)
-            screen.add(Optional.of(new Cell(cursorStyle, c)));
+            if (c.isPresent())
+                screen.add(Optional.of(new Cell(cursorStyle, c.get())));
+            else
+                screen.add(Optional.empty());
 
         flushScreen();
     }
@@ -247,5 +252,17 @@ public class TerminalBuffer implements ITerminalBuffer {
         // remove line from screen
         screen.subList(0, screenDimensions.x).clear();
         cursorPos.y--; // correct cursor position
+    }
+
+    @Override
+    public void clearScreen() {
+        for (int i = 0; i < screen.size(); i++)
+            screen.set(i, Optional.empty());
+    }
+
+    @Override
+    public void clearAll() {
+        clearScreen();
+        scrollback.clear();
     }
 }
