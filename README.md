@@ -1,3 +1,8 @@
+|Quick Navigation|
+|---|
+|[Java Implementation](https://github.com/Siriusmart/term-buffer-dummy/tree/master/app/src/main/java/ws/siri/termbuffer)|
+|[Test cases](https://github.com/Siriusmart/term-buffer-dummy/tree/master/app/src/test/java/ws/siri/termbuffer)|
+
 # Terminal Text Buffer
 
 > [!NOTE]
