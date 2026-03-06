@@ -1,7 +1,7 @@
 # Terminal Text Buffer
 
 > [!NOTE]
-> All code except TerminalBufferTestByClaude.java are human-written without assistent of generative AI tools.
+> All code except TerminalBufferTestByClaude.java are human-written without assistance of generative AI tools.
 
 ## Design
 
