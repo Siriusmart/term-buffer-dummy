@@ -31,7 +31,7 @@ None represents an empty cell, here's the properties of an empty cell
   ```
   where `|` represents the cursor, writing `AAAA` to the buffer will result in
   ```
-  XXXXX|AAAAXX[ empty ]XXX
+  XXXXXAAAA|XX[ empty ]XXX
   ```
   
   This behaviour allows for multiple lines to be edited in the same buffer, consider the buffer below
